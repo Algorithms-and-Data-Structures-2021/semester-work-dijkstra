@@ -1,114 +1,117 @@
 #include "data_structure.hpp"
-#include <algorithm>
-#include <climits>
-#include <iostream>
-using namespace std;
+#include <vector>
+#include <stdexcept>
 
-const int maxnodes = 200000;
-const int maxedges = 1000000;
+#define INF 1000000
 
-// graph
-int edges;
-int last[maxnodes], head[maxedges], previous[maxedges], len[maxedges];
-int prio[maxnodes], pred[maxnodes];
+namespace itis {
 
-void graphClear() {
-  fill(last, last + maxnodes, -1);
-  edges = 0;
-}
+  BinaryHeap::BinaryHeap() {
+    data_ = new std::vector<std::pair<int, int>>;
+  };
 
-void itis::Graph::addEdge(int u, int v, int length) {
-  head[edges] = v;
-  len[edges] = length;
-  previous[edges] = last[u];
-  last[u] = edges++;
-}
-
-// heap
-int h[maxnodes];
-int pos2Id[maxnodes];
-int id2Pos[maxnodes];
-int hsize;
-
-void hswap(int i, int j) {
-  swap(h[i], h[j]);
-  swap(pos2Id[i], pos2Id[j]);
-  swap(id2Pos[pos2Id[i]], id2Pos[pos2Id[j]]);
-}
-
-void moveUp(int pos) {
-  while (pos > 0) {
-    int parent = (pos - 1) >> 1;
-    if (h[pos] >= h[parent]) {
-      break;
-    }
-    hswap(pos, parent);
-    pos = parent;
+  BinaryHeap::~BinaryHeap() {
+    size_ = 0;
+    data_->clear();
+    delete data_;
+    data_ = nullptr;
   }
-}
 
-void add(int id, int prio) {
-  h[hsize] = prio;
-  pos2Id[hsize] = id;
-  id2Pos[id] = hsize;
-  moveUp(hsize++);
-}
-
-void increasePriority(int id, int prio) {
-  int pos = id2Pos[id];
-  h[pos] = prio;
-  moveUp(pos);
-}
-
-void moveDown(int pos) {
-  while (pos < (hsize >> 1)) {
-    int child = 2 * pos + 1;
-    if (child + 1 < hsize && h[child + 1] < h[child]) {
-      ++child;
+  std::pair<int, int> BinaryHeap::pop() {
+    if (size_ <= 0) {
+      throw std::logic_error("error");
     }
-    if (h[pos] <= h[child]) {
-      break;
+
+    size_ -= 1;
+    std::pair<int, int> pair_to_return = data_->at(0);
+    data_->at(0) = data_->at(size_);
+    data_->pop_back();
+
+    return_to_normal(0);
+    return pair_to_return;
+  }
+
+  void BinaryHeap::return_to_normal(int vertex) {
+    int left_child = vertex * 2 + 1;
+    int right_child = vertex * 2 + 2;
+    int current_vert = vertex;
+    int min_child;
+
+    if (left_child >= size_) {
+      return;
     }
-    hswap(pos, child);
-    pos = child;
-  }
-}
 
-int removeMin() {
-  int res = pos2Id[0];
-  int lastNode = h[--hsize];
-  if (hsize > 0) {
-    h[0] = lastNode;
-    int id = pos2Id[hsize];
-    id2Pos[id] = 0;
-    pos2Id[0] = id;
-    moveDown(0);
-  }
-  return res;
-}
-
-void itis::Graph::dijkstra(int s) {
-  fill(pred, pred + maxnodes, -1);
-  fill(prio, prio + maxnodes, INT_MAX);
-  prio[s] = 0;
-  hsize = 0;
-  add(s, 0);
-
-  while (hsize) {
-    int u = removeMin();
-    for (int e = last[u]; e >= 0; e = previous[e]) {
-      int v = head[e];
-      int nprio = prio[u] + len[e];
-      if (prio[v] > nprio) {
-        if (prio[v] == INT_MAX)
-          add(v, nprio);
-        else
-          increasePriority(v, nprio);
-        prio[v] = nprio;
-        pred[v] = u;
+    if (right_child >= size_) {
+      min_child = left_child;
+    } else {
+      if (data_->at(left_child).first < data_->at(right_child).first) {
+        min_child = left_child;
+      } else {
+        min_child = right_child;
       }
     }
+
+    if (data_->at(min_child).first < data_->at(current_vert).first) {
+      swap(current_vert, min_child);
+      current_vert = min_child;
+    }
+
+    if (current_vert == vertex) {
+      return;
+    }
+
+    return_to_normal(current_vert);
   }
-  for (int i = 0; i < 4; i++)
-    cout << prio[i] << endl;
-}
+
+  void BinaryHeap::swap(int first, int second) {
+    std::pair<int, int> to_swap = data_->at(first);
+    data_->at(first) = data_->at(second);
+    data_->at(second) = to_swap;
+  }
+
+  void BinaryHeap::push_back(std::pair<int, int> new_pair) {
+    data_->push_back(new_pair);
+    down_up_sort(size_);
+    size_ += 1;
+  }
+
+  void BinaryHeap::down_up_sort(int index) {
+    if (index == 0) {
+      return;
+    }
+
+    int parent = (index - 1) / 2;
+    if (data_->at(parent).first > data_->at(index).first) {
+      swap(parent, index);
+      down_up_sort(parent);
+    }
+  }
+
+  std::vector<int> Graph::dijkstra(std::vector<std::vector<int>> adjacencyMatrix, int vertex) {
+    int vert_in_graph = adjacencyMatrix.size();
+    vertex -= 1;
+    std::vector<int> d(vert_in_graph, INF);
+    d[vertex] = 0;
+    BinaryHeap heap = BinaryHeap();
+    heap.push_back(std::make_pair(0, vertex));
+    std::pair<int, int> highest_pair;
+
+    while (heap.size() != 0) {
+      highest_pair = heap.pop();
+
+      if (highest_pair.first > d[highest_pair.second]) {
+        continue;
+      }
+
+      for (int i = 0; i < vert_in_graph; i++) {
+        int len = adjacencyMatrix[highest_pair.second][i];
+        if ((d[i] > d[highest_pair.second] + len) && (len >= 0)) {
+          d[i] = d[highest_pair.second] + len;
+          heap.push_back(std::make_pair(d[i], i));
+        }
+      }
+    }
+
+    return d;
+  }
+}  // namespace itis

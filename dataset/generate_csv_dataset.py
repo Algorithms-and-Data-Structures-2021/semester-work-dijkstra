@@ -1,59 +1,68 @@
+import csv
+import os
 from random import randint
-from os import mkdir
-
-ops = ('firstNode', 'secondNode', 'distance')
-
-setOfNodes = set()
-value = 0
-value1 = 0
-value2 = 0
 
 
-def node1_generator(min_value: int = 0, max_value: int = 5):
-    """Function to generate values for tests"""
-    for op in ops:
-        if op == "firstNode":
-            mkdir(op)
-            for elements_quantity in (1, 2, 3, 4):
-                with open(f'{op}/data({elements_quantity}).txt', "a") as inp:
-                    for i in range(elements_quantity):
-                        value1 = randint(min_value, max_value)
-                        inp.write(str(value1) + " ")
-                    inp.write("\n")
+class CreateData:
+    @staticmethod
+    def create_data():
+        os.chdir(os.path.abspath(os.curdir).replace("cmake-build-debug", ""))
+        os.chdir(os.path.abspath(os.curdir).replace("benchmark", ""))
+        os.chdir(os.path.abspath(os.curdir).replace("dataset", ""))
+
+        try:
+            os.mkdir("dataset")
+        except Exception as e:
+            pass
+        os.chdir("dataset")
+
+        try:
+            os.mkdir("data")
+        except Exception as e:
+            pass
+        os.chdir("data")
+
+        folders1 = ['insert']
+        folders2 = ['01', '02', '03', '04', '05']
+        amount = [100, 500, 1000, 5000, 10000]
+        for a in folders1:
+
+            try:
+                os.mkdir(a)
+            except Exception:
+                pass
+            os.chdir(a)
+
+            for b in folders2:
+                try:
+                    os.mkdir(b)
+                except Exception:
+                    continue
+                os.chdir(b)
+
+                for i in amount:
+                    file_name = str(i) + "x" + str(i) + " adjacency matrix" + ".csv"
+                    with open(file_name, "w") as file:
+                        dataset = csv.writer(file)
+                        n = 0
+                        for j in range(i):
+                            row = []
+                            flag = True
+                            for k in range(i):
+                                if k == n and flag:
+                                    row.append(0)
+                                    flag = False
+                                    n += 1
+                                else:
+                                    row.append(randint(1, 1000))
+
+                            dataset.writerow(row)
+
+                os.chdir('..')
+            os.chdir('..')
+
+        print('Done =)')
 
 
-value = value1
-
-
-def node2_generator(min_value: int = 0, max_value: int = 5):
-    """Function to generate values for tests"""
-    for op in ops:
-        if op == "secondNode":
-            mkdir(op)
-            for elements_quantity in (1, 2, 3, 4):
-                with open(f'{op}/data({elements_quantity}).txt', "a") as inp:
-                    for i in range(elements_quantity):
-                        if value2 != value:
-                            value2 = randint(min_value, max_value)
-                        inp.write(str(value1) + " ")
-                    inp.write("\n")
-
-
-def distance_generator(min_value: int = 0, max_value: int = 10):
-    """Function to generate values for tests"""
-    for op in ops:
-        mkdir(op)
-        for elements_quantity in (1, 2, 3, 4):
-            with open(f'{op}/data({elements_quantity}).txt', "a") as inp:
-                for i in range(elements_quantity):
-                    distance = randint(min_value, max_value)
-                    inp.write(str(distance) + " ")
-                inp.write("\n")
-
-
-if __name__ == '__main__':
-    help_message = """"""
-    node1_generator()
-    node2_generator()
-    distance_generator()
-    print('successfully')
+if __name__ == "__main__":
+    CreateData.create_data()

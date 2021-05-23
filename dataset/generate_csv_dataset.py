@@ -1,39 +1,59 @@
-import argparse
+from random import randint
+from os import mkdir
 
-DEFAULT_DESCRIPTION = 'CSV dataset generator script demo.'
-DEFAULT_SAMPLES = 100
+ops = ('firstNode', 'secondNode', 'distance')
+
+setOfNodes = set()
+value = 0
+value1 = 0
+value2 = 0
 
 
-def parse_args():
-    """
-    Парсинг аргументов командной строки (CLI).
-    :return интерфейс для работы с аргументами.
+def node1_generator(min_value: int = 0, max_value: int = 5):
+    """Function to generate values for tests"""
+    for op in ops:
+        if op == "firstNode":
+            mkdir(op)
+            for elements_quantity in (1, 2, 3, 4):
+                with open(f'{op}/data({elements_quantity}).txt', "a") as inp:
+                    for i in range(elements_quantity):
+                        value1 = randint(min_value, max_value)
+                        inp.write(str(value1) + " ")
+                    inp.write("\n")
 
-    Больше информации на https://docs.python.org/3.7/howto/argparse.html
-    """
-    parser = argparse.ArgumentParser(description=DEFAULT_DESCRIPTION)
 
-    parser.add_argument('output',
-                        type=str,
-                        help='output CSV file, e.g. data/output.csv')
+value = value1
 
-    parser.add_argument('--samples',
-                        type=int,
-                        default=DEFAULT_SAMPLES,
-                        help='number of samples to generate (default: {})'.format(DEFAULT_SAMPLES))
 
-    return parser.parse_args()
+def node2_generator(min_value: int = 0, max_value: int = 5):
+    """Function to generate values for tests"""
+    for op in ops:
+        if op == "secondNode":
+            mkdir(op)
+            for elements_quantity in (1, 2, 3, 4):
+                with open(f'{op}/data({elements_quantity}).txt', "a") as inp:
+                    for i in range(elements_quantity):
+                        if value2 != value:
+                            value2 = randint(min_value, max_value)
+                        inp.write(str(value1) + " ")
+                    inp.write("\n")
+
+
+def distance_generator(min_value: int = 0, max_value: int = 10):
+    """Function to generate values for tests"""
+    for op in ops:
+        mkdir(op)
+        for elements_quantity in (1, 2, 3, 4):
+            with open(f'{op}/data({elements_quantity}).txt', "a") as inp:
+                for i in range(elements_quantity):
+                    distance = randint(min_value, max_value)
+                    inp.write(str(distance) + " ")
+                inp.write("\n")
 
 
 if __name__ == '__main__':
-    args = parse_args()
-
-    # валидация аргументов
-    if args.samples < 0:
-        raise ValueError('Number of samples must be greater than 0.')
-
-    # запись данных в файл
-    with open(args.output, 'w') as file:
-        for i in range(args.samples - 1):
-            file.write('{},'.format(i))
-        file.write(str(args.samples - 1))
+    help_message = """"""
+    node1_generator()
+    node2_generator()
+    distance_generator()
+    print('successfully')

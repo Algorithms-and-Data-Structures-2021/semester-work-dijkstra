@@ -24,7 +24,7 @@ class CreateData:
 
         folders1 = ['insert']
         folders2 = ['01', '02', '03', '04', '05']
-        amount = [100, 500, 1000, 5000, 10000]
+        amount = [100, 500, 1000, 5000]
         for a in folders1:
 
             try:

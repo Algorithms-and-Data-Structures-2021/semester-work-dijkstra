@@ -24,8 +24,7 @@ int main() {
   // работа с набором данных
   vector<string> folders = {"01", "02", "03", "04", "05"};
   vector<string> files = {"100x100 adjacency matrix.csv", "500x500 adjacency matrix.csv",
-                          "1000x1000 adjacency matrix.csv", "5000x5000 adjacency matrix.csv",
-                          "10000x10000 adjacency matrix.csv"};
+                          "1000x1000 adjacency matrix.csv", "5000x5000 adjacency matrix.csv"};
   std::vector<std::vector<int>> parsedMatrix;
   Graph graph;
   int line_number = 1;
